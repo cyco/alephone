@@ -29,6 +29,9 @@
 #ifdef HAVE_OPENGL
 #include "OGL_Render.h"
 
+// ccl
+#include "Callbacks.h"
+
 const int OGL_Blitter::tile_size;
 set<OGL_Blitter*> *OGL_Blitter::m_blitter_registry = NULL;
 

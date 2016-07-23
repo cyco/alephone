@@ -75,6 +75,9 @@
 #define MUST_RELOAD_VIEW_CONTEXT
 #endif
 
+// ccl
+#include "Callbacks.h"
+
 // Global variables
 static SDL_Surface *main_surface;	// Main (display) surface
 static SDL_Window *main_screen;
@@ -719,6 +722,9 @@ static void change_screen_mode(int width, int height, int depth, bool nogl)
 	if (!nogl && screen_mode.acceleration != _no_acceleration) {
 		passed_shader = false;
 		flags |= SDL_WINDOW_OPENGL;
+#if TARGET_OS_TV
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+#endif
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 8);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 8);

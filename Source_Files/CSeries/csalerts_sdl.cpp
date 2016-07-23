@@ -127,7 +127,7 @@ void system_launch_url_in_browser(const char *url)
 {
 #if defined(__WIN32__)
 	ShellExecute(NULL, "open", url, NULL, NULL, SW_SHOWNORMAL);
-#else
+#elif !defined(TARGET_OS_TV)
 	pid_t pid = fork();
 	if (pid == 0)
 	{

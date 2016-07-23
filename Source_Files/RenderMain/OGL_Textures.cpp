@@ -101,6 +101,10 @@ May 3, 2003 (Br'fin (Jeremy Parsons))
 #include "OGL_Textures.h"
 #include "screen.h"
 
+#if TARGET_OS_TV
+#include "Callbacks.h"
+#endif
+
 OGL_TexturesStats gGLTxStats = {0,0,0,500000,0,0, 0};
 
 // Texture mapping
@@ -262,7 +266,11 @@ void FlatBumpTexture() {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+#if TARGET_OS_TV
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, flatTextureData);
+#else
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, flatTextureData);
+#endif
 	}
 	else
 		glBindTexture(GL_TEXTURE_2D, flatBumpTextureID);
@@ -304,9 +312,13 @@ void OGL_StartTextures()
 	const int NUMBER_OF_COLOR_FORMATS = 3;
 	const GLenum ColorFormatList[NUMBER_OF_COLOR_FORMATS] = 
 	{
+#if TARGET_OS_TV
+		GL_RGBA
+#else
 		GL_RGBA8,
 		GL_RGBA4,
 		GL_RGBA2
+#endif
 	};
 	
 	OGL_ConfigureData& ConfigureData = Get_OGL_ConfigureData();
@@ -334,7 +346,11 @@ void OGL_StartTextures()
 		if (ColorFormat < NUMBER_OF_COLOR_FORMATS)
 			TxtrTypeInfo.ColorFormat = ColorFormatList[ColorFormat];
 		else
+#if TARGET_OS_TV
+			TxtrTypeInfo.ColorFormat = GL_RGBA;
+#else
 			TxtrTypeInfo.ColorFormat = GL_RGBA8;
+#endif
 	}
 
 	// Model skin
@@ -360,7 +376,11 @@ void OGL_StartTextures()
 		if (ColorFormat < NUMBER_OF_COLOR_FORMATS)
 			TxtrTypeInfo.ColorFormat = ColorFormatList[ColorFormat];
 		else
+#if TARGET_OS_TV
+			TxtrTypeInfo.ColorFormat = GL_RGBA;
+#else
 			TxtrTypeInfo.ColorFormat = GL_RGBA8;
+#endif
 	}
 
 #if defined GL_SGIS_generate_mipmap
@@ -1198,9 +1218,10 @@ uint32 *TextureManager::Shrink(uint32 *Buffer)
 {
 	int NumPixels = int(LoadedWidth)*int(LoadedHeight);
 	GLuint *NewBuffer = new GLuint[NumPixels];
+#if ! TARGET_OS_TV
 	gluScaleImage(GL_RGBA, TxtrWidth, TxtrHeight, GL_UNSIGNED_BYTE, Buffer,
-		LoadedWidth, LoadedHeight, GL_UNSIGNED_BYTE, NewBuffer);
-	
+				  LoadedWidth, LoadedHeight, GL_UNSIGNED_BYTE, NewBuffer);
+#endif
 	return (uint32 *)NewBuffer;
 }
 
@@ -1221,7 +1242,7 @@ void TextureManager::PlaceTexture(const ImageDescriptor *Image, bool normal_map)
 		if (internalFormat == GL_RGBA8)
 			internalFormat = GL_RGB8;
 		else if (internalFormat == GL_RGBA4)
-			internalFormat = GL_RGB5;
+			; // internalFormat = GL_RGB5;
 	} 
 	else if (!IsBlended() && internalFormat == GL_RGBA4)
 	{
@@ -1231,28 +1252,29 @@ void TextureManager::PlaceTexture(const ImageDescriptor *Image, bool normal_map)
 	bool load_as_sRGB = (Wanting_sRGB && !normal_map &&
 						 Collection != _collection_interface &&
 						 Collection != _collection_weapons_in_hand);
-	
+	// CCL
+	// disable undefined cases
 	if(load_as_sRGB) {
 	  switch(internalFormat) {
 	  case GL_RGB:
-	  case GL_R3_G3_B2:
-	  case GL_RGB4:
-	  case GL_RGB5:
+	  // case GL_R3_G3_B2:
+	  // case GL_RGB4:
+	  // case GL_RGB5:
 	  case GL_RGB8:
-	  case GL_RGB10:
-	  case GL_RGB12:
-	  case GL_RGB16:
+	  // case GL_RGB10:
+	  // case GL_RGB12:
+	  // case GL_RGB16:
 	    internalFormat = GL_SRGB;
 	    break;
 	  case GL_RGBA:
-	  case GL_RGBA2:
+ 	  // case GL_RGBA2:
 	  case GL_RGBA4:
 	  case GL_RGB5_A1:
 	  case GL_RGBA8:
 	  case GL_RGB10_A2:
-	  case GL_RGBA12:
-	  case GL_RGBA16:
-	    internalFormat = GL_SRGB_ALPHA;
+	  // case GL_RGBA12:
+	  // case GL_RGBA16:
+	    internalFormat = GL_RGBA; // ccl GL_SRGB_ALPHA;
 	    break;
 #if defined(GL_ARB_texture_compression) && defined(GL_COMPRESSED_RGB_S3TC_DXT1_EXT)
 	    /* These might not do anything... */
@@ -1289,6 +1311,9 @@ void TextureManager::PlaceTexture(const ImageDescriptor *Image, bool normal_map)
 		glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_FALSE);
 	}
 #endif
+#if TARGET_OS_TV
+				glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+#endif
 				int i = 0;
 				for (i = 0; i < Image->GetMipMapCount(); i++) {
 					glTexImage2D(GL_TEXTURE_2D, i, internalFormat, max(1, Image->GetWidth() >> i), max(1, Image->GetHeight() >> i), 0, GL_RGBA, GL_UNSIGNED_BYTE, Image->GetMipMapPtr(i));
@@ -1302,7 +1327,14 @@ void TextureManager::PlaceTexture(const ImageDescriptor *Image, bool normal_map)
 			} else 
 #endif
 			{
+#if TARGET_OS_TV
+				// DJB OpenGL gluBuild2DMipmaps
+				glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+				assert ( internalFormat == GL_RGBA );
+				glTexImage2D(GL_TEXTURE_2D, 0,internalFormat, Image->GetWidth(), Image->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE, Image->GetBuffer());
+#else
 				gluBuild2DMipmaps(GL_TEXTURE_2D, internalFormat, Image->GetWidth(), Image->GetHeight(), GL_RGBA, GL_UNSIGNED_BYTE, Image->GetBuffer());
+#endif
 			}
 			mipmapsLoaded = true;
 			}
@@ -1664,6 +1696,9 @@ void LoadModelSkin(ImageDescriptor& SkinImage, short Collection, short CLUT)
 					glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP_SGIS, GL_FALSE);
 				}
 #endif
+#if TARGET_OS_TV
+				glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_FALSE);
+#endif
 				int i = 0;
 				for (i = 0; i < Image.get()->GetMipMapCount(); i++) 
 				{
@@ -1682,8 +1717,17 @@ void LoadModelSkin(ImageDescriptor& SkinImage, short Collection, short CLUT)
 				else
 #endif
 				{
+#if TARGET_OS_TV
+					// DJB OpenGL No gluBuild2DMipmaps
+					glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+					glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
+								 Image.get()->GetWidth(),
+								 Image.get()->GetHeight(), 0, GL_RGBA, GL_UNSIGNED_BYTE,
+								 Image.get()->GetBuffer());
+#else
 					gluBuild2DMipmaps(GL_TEXTURE_2D, TxtrTypeInfo.ColorFormat, LoadedWidth, LoadedHeight,
-							  GL_RGBA, GL_UNSIGNED_BYTE, Image.get()->GetBuffer());
+									  GL_RGBA, GL_UNSIGNED_BYTE, Image.get()->GetBuffer());
+#endif
 				}
 				mipmapsLoaded = true;
 			}

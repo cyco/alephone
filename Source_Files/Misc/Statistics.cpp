@@ -19,7 +19,16 @@
 */
 
 #include "Statistics.h"
-#include "HTTP.h"
+
+#if TARGET_OS_TV
+/* 
+ * using xcode with a case-insensitive fs LibNAT's http.h is included unless 
+ * specified by a relative path
+ */ 
+#include "../Network/HTTP.h"
+#else
+#include "HTTP.H"
+#endif
 #include "lua_script.h"
 
 #include "sdl_widgets.h"

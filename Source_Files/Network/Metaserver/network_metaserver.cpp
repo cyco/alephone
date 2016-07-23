@@ -37,7 +37,16 @@
 #include "CommunicationsChannel.h"
 #include "preferences.h"
 #include "alephversion.h"
-#include "HTTP.h"
+#if TARGET_OS_TV
+/* 
+ * using xcode with a case-insensitive fs LibNAT's http.h is included unless 
+ * specified by a relative path
+ */ 
+#include "../HTTP.h"
+#else
+#include "HTTP.H"
+#endif
+
 
 #include <string>
 #include <iostream>

@@ -144,7 +144,9 @@ bool ImageDescriptor::Minify()
 		{
 			
 			uint32 *newPixels = new uint32[newWidth * newHeight];
+#if ! TARGET_OS_TV
 			gluScaleImage(GL_RGBA, Width, Height, GL_UNSIGNED_BYTE, Pixels, newWidth, newHeight, GL_UNSIGNED_BYTE, newPixels);
+#endif
 			delete []Pixels;
 			Pixels = newPixels;
 			Width = newWidth;

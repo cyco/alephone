@@ -87,6 +87,10 @@ Feb 5, 2002 (Br'fin (Jeremy Parsons)):
 #include "progress.h"
 #include "InfoTree.h"
 
+#if TARGET_OS_TV
+#include "Callbacks.h"
+#endif
+
 // Whether or not OpenGL is present and usable
 static bool _OGL_IsPresent = false;
 
@@ -147,6 +151,9 @@ extern bool OGL_ClearScreen();
 #ifdef HAVE_OPENGL
 void OGL_StartProgress(int total_progress)
 {
+#if TARGET_OS_TV
+	helperLoadingStart(total_progress);
+#else
 	ogl_progress = 0;
 	total_ogl_progress = total_progress;
 	if (!OGL_LoadScreen::instance()->Start())
@@ -156,10 +163,14 @@ void OGL_StartProgress(int total_progress)
 	}
 	show_ogl_progress = true;
 	last_update_tick = SDL_GetTicks();
+#endif
 }
 
 void OGL_ProgressCallback(int delta_progress)
 {
+#if TARGET_OS_TV
+	helperLoadingProgress(delta_progress);
+#else
 	if (!show_ogl_progress) return;
 	ogl_progress += delta_progress;
 	{
@@ -173,15 +184,20 @@ void OGL_ProgressCallback(int delta_progress)
 			last_update_tick = current_ticks;
 		}
 	}
+#endif
 }
 
 void OGL_StopProgress()
 {
+#if TARGET_OS_TV
+	helperLoadingFinish();
+#else
 	show_ogl_progress = false;
 	if (OGL_LoadScreen::instance()->Use())
 		OGL_LoadScreen::instance()->Stop();
 	else
 		close_progress_dialog();
+#endif
 }
 #endif
 

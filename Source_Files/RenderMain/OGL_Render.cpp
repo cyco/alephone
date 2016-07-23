@@ -435,12 +435,18 @@ static ModelRenderShader StaticModeShaders[4];
 // Data for static-mode shader callback: which one in sequence
 static int SequenceNumbers[4] = {0, 1, 2, 3};
 
+#if TARGET_OS_TV
+#define COLOR_COMPONENTS 4
+#else
+#define COLOR_COMPONENTS 3
+#endif
+
 // Contains everything that the shader callbacks will need
 struct ShaderDataStruct
 {
 	OGL_ModelData *ModelPtr;
 	OGL_SkinData *SkinPtr;
-	GLfloat Color[4];
+	GLfloat Color[COLOR_COMPONENTS];
 	short Collection, CLUT;
 };
 static ShaderDataStruct ShaderData;
@@ -1221,7 +1227,7 @@ struct ExtendedVertexData
 {
 	GLdouble Vertex[4];
 	GLdouble TexCoord[2];
-	GLfloat Color[3];
+	GLfloat Color[COLOR_COMPONENTS];
 	GLfloat GlowColor[3];
 };
 
@@ -1594,13 +1600,16 @@ static bool RenderAsRealWall(polygon_definition& RenderPolygon, bool IsVertical)
 			
 			// Set up for vertex lighting
 			glEnableClientState(GL_COLOR_ARRAY);
-			glColorPointer(3,GL_FLOAT,sizeof(ExtendedVertexData),ExtendedVertexList[0].Color);
+			glColorPointer(COLOR_COMPONENTS,GL_FLOAT,sizeof(ExtendedVertexData),ExtendedVertexList[0].Color);
 			
 			// Calculate the lighting
 			for (int k=0; k<NumVertices; k++)
 			{
 				FindShadingColor(-ExtendedVertexList[k].Vertex[2],RenderPolygon.ambient_shade,ExtendedVertexList[k].Color);
 				ExtendedVertexList[k].GlowColor[0] = ExtendedVertexList[k].GlowColor[1] = ExtendedVertexList[k].GlowColor[2] = std::max(GlowColor, ExtendedVertexList[k].Color[0]);
+#if COLOR_COMPONENTS == 4
+				ExtendedVertexList[k].Color[3] = 1.0;
+#endif
 			}
 		}
 		else
@@ -2668,7 +2677,8 @@ void SetupStaticMode(int16 transfer_data)
 		}
 		
 		// Get ready to use those static patterns
-		glEnable(GL_POLYGON_STIPPLE);
+		// ccl
+		// glEnable(GL_POLYGON_STIPPLE);
 #else
 		// Use the stencil buffer to create the static effect
 		glEnable(GL_STENCIL_TEST);
@@ -2690,7 +2700,8 @@ void TeardownStaticMode()
 		// Restore the default blending
 		glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 		// glDisable(GL_COLOR_LOGIC_OP);
-		glDisable(GL_POLYGON_STIPPLE);
+		// ccl
+		// glDisable(GL_POLYGON_STIPPLE);
 #else
 		// Done with the stencil buffer
 		glDisable(GL_STENCIL_TEST);
@@ -2751,7 +2762,8 @@ void StaticModeIndivSetup(int SeqNo)
 
 	// no need to correct
 	glColor3fv(StaticBaseColors[SeqNo]);			
-	glPolygonStipple((byte *)StaticPatterns[SeqNo]);
+	// ccl
+	// glPolygonStipple((byte *)StaticPatterns[SeqNo]);
 #else
 	// Stencil buffering
 	switch(SeqNo)
@@ -3043,10 +3055,13 @@ bool OGL_RenderText(short BaseX, short BaseY, const char *Text, unsigned char r,
 	// Create display list for the current text string;
 	// use the "standard" text-font display list (display lists can be nested)
 	GLuint TextDisplayList;
-	TextDisplayList = glGenLists(1);
-	glNewList(TextDisplayList,GL_COMPILE);
+	// ccl
+	// TextDisplayList = glGenLists(1);
+	// ccl
+	// glNewList(TextDisplayList,GL_COMPILE);
 	GetOnScreenFont().OGL_Render(Text);
-	glEndList();
+	// ccl
+	// glEndList();
 	
 	// Place the text in the foreground of the display
 	SetProjectionType(Projection_Screen);
@@ -3092,17 +3107,20 @@ bool OGL_RenderText(short BaseX, short BaseY, const char *Text, unsigned char r,
 	
 	glLoadIdentity();
 	glTranslatef(BaseX+1.0F,BaseY+1.0F,Depth);
-	glCallList(TextDisplayList);
+	// ccl
+	// glCallList(TextDisplayList);
 	
 	// Foreground
 	SglColor3f(r/255.0f,g/255.0f,b/255.0f);
 
 	glLoadIdentity();
 	glTranslatef(BaseX,BaseY,Depth);
-	glCallList(TextDisplayList);
+	// ccl
+	// glCallList(TextDisplayList);
 		
 	// Clean up
-	glDeleteLists(TextDisplayList,1);
+	// ccl
+	// glDeleteLists(TextDisplayList,1);
 	glPopMatrix();
 	
 	return true;

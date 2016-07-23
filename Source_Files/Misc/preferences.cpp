@@ -92,7 +92,15 @@ May 22, 2003 (Woody Zenfell):
 #include "mouse.h"
 
 #include "Music.h"
-#include "HTTP.h"
+#if TARGET_OS_TV
+/* 
+ * using xcode with a case-insensitive fs LibNAT's http.h is included unless 
+ * specified by a relative path
+ */ 
+#include "../Network/HTTP.h"
+#else
+#include "HTTP.H"
+#endif
 #include "alephversion.h"
 
 #include <cmath>
@@ -2449,6 +2457,7 @@ void read_preferences ()
 	*sound_preferences = SoundManager::Parameters();
 	default_environment_preferences(environment_preferences);
 
+#if ! TARGET_OS_TV
 	// Slurp in the file and parse it
 
 	FileSpecifier FileSpec;
@@ -2538,6 +2547,7 @@ void read_preferences ()
 	//       default file.
 	//       (Problem is SDL specific - socre one for Carbon? :) )
 	clear_game_error ();
+#endif
 }
 
 
@@ -2923,6 +2933,7 @@ InfoTree environment_preferences_tree()
 
 void write_preferences()
 {
+#if ! TARGET_OS_TV
 	InfoTree root;
 	root.put_attr("version", A1_DATE_VERSION);
 	
@@ -2949,6 +2960,7 @@ void write_preferences()
 	} catch (InfoTree::unexpected_error ex) {
 		logError("Error saving preferences file (%s): %s", FileSpec.GetPath(), ex.what());
 	}
+#endif
 }
 
 
@@ -2961,8 +2973,13 @@ static void default_graphics_preferences(graphics_preferences_data *preferences)
   memset(&preferences->screen_mode, '\0', sizeof(screen_mode_data));
 	preferences->screen_mode.gamma_level= DEFAULT_GAMMA_LEVEL;
 
+#if TARGET_OS_TV
+	preferences->screen_mode.width = 1920;
+	preferences->screen_mode.height = 1080;
+#else
 	preferences->screen_mode.width = 640;
 	preferences->screen_mode.height = 480;
+#endif
 	preferences->screen_mode.auto_resolution = true;
 	preferences->screen_mode.hud = true;
 	preferences->screen_mode.hud_scale_level = 0;
