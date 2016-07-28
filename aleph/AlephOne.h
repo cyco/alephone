@@ -58,4 +58,5 @@
 #include "mytm.h"
 #import "sdl_dialogs.h"
 #import "XML_ParseTreeRoot.h"
+#import "DefaultStringSets.h"
 #endif

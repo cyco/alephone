@@ -2800,7 +2800,7 @@ void interface_fade_out(
 	short pict_resource_number,
 	bool fade_music)
 {
-	assert(current_picture_clut);
+	// assert(current_picture_clut);
 	if(current_picture_clut)
 	{
 		struct color_table *fadeout_animated_color_table;

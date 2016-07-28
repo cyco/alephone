@@ -822,7 +822,6 @@
 		83465DFC1D3BD02B0046E13E /* byte_swapping.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = byte_swapping.h; sourceTree = "<group>"; };
 		83465DFD1D3BD02B0046E13E /* csalerts.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = csalerts.h; sourceTree = "<group>"; };
 		83465DFE1D3BD02B0046E13E /* csalerts.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = csalerts.mm; sourceTree = "<group>"; };
-		83465DFF1D3BD02B0046E13E /* csalerts.mm.orig */ = {isa = PBXFileReference; lastKnownFileType = text; path = csalerts.mm.orig; sourceTree = "<group>"; };
 		83465E001D3BD02B0046E13E /* csalerts_sdl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = csalerts_sdl.cpp; sourceTree = "<group>"; };
 		83465E011D3BD02B0046E13E /* cscluts.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = cscluts.h; sourceTree = "<group>"; };
 		83465E021D3BD02B0046E13E /* cscluts_sdl.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = cscluts_sdl.cpp; sourceTree = "<group>"; };
@@ -1579,7 +1578,6 @@
 				83465E0F1D3BD02B0046E13E /* FilmProfile.h */,
 				83465E111D3BD02B0046E13E /* mytm.h */,
 				83465DFE1D3BD02B0046E13E /* csalerts.mm */,
-				83465DFF1D3BD02B0046E13E /* csalerts.mm.orig */,
 			);
 			name = CSeries;
 			path = Source_Files/CSeries;

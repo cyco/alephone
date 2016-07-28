@@ -36,6 +36,9 @@
 #include "preferences.h"
 #include "screen.h"
 
+#if TARGET_OS_TV
+#include "Callbacks.h"
+#endif
 
 // Global variables
 static bool mouse_active = false;
@@ -107,7 +110,9 @@ void mouse_idle(short type)
 		float dy = -snapshot_delta_y / static_cast<float>(ticks_elapsed);
 		snapshot_delta_x = 0;
 		snapshot_delta_y = 0;
-		
+#if TARGET_OS_TV
+		helperGetMouseDelta(&dx, &dy);
+#endif
 		// Mouse inversion
 		if (TEST_FLAG(input_preferences->modifiers, _inputmod_invert_mouse))
 			dy = -dy;

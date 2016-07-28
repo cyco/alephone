@@ -2547,6 +2547,9 @@ void read_preferences ()
 	//       default file.
 	//       (Problem is SDL specific - socre one for Carbon? :) )
 	clear_game_error ();
+#else
+	input_preferences->input_device = _mouse_yaw_pitch;
+	clear_game_error ();
 #endif
 }
 
@@ -3383,7 +3386,7 @@ restore_custom_player_behavior_modifiers() {
 
 bool
 is_player_behavior_standard() {
-    return (!dont_switch_to_new_weapon() && !dont_auto_recenter());
+	return false; // (!dont_switch_to_new_weapon() && !dont_auto_recenter());
 }
 
 
